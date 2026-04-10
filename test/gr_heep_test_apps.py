@@ -48,7 +48,7 @@ SIM_TIMEOUT_S = 180
 
 # Whitelist of apps. Has priority over the blacklist.
 # Useful if you only want to test certain apps
-WHITELIST_XHEEP = ["hello_world"]
+WHITELIST_XHEEP = []
 WHITELIST = []
 
 # Blacklist of apps to skip
