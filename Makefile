@@ -52,6 +52,10 @@ RTL_FILES := $(wildcard hw/gr-heep/*.sv)
 GR_HEEP_GEN_TPLS := $(shell find . \( -path './hw/vendor' -o -path './hw/fpga' -o -path './sw/device' -o -path './sw/linker' \) -prune -o -name '*.tpl' -print)
 EXTERNAL_MCU_GEN_TEMPLATES = $(addprefix $(HEEP_REL_PATH)/,$(GR_HEEP_GEN_TPLS))
 
+# Testing flags
+# Optional TEST_FLAGS options are '--compile-only'
+TEST_FLAGS=
+
 # Software
 PROJECT := hello_world
 
@@ -148,6 +152,15 @@ vivado-fpga:
 vivado-fpga-pgm:
 	$(FUSESOC) --cores-root . run --no-export --target=$(FPGA_BOARD) $(FUSESOC_FLAGS) \
 		--run x-heep:systems:gr-heep $(FUSESOC_PARAM) 2>&1 | tee programfpga.log
+
+## @section Testing
+
+## Run GR-HEEP tests
+.PHONY: test
+test: mcu-gen
+	$(RM) test/*.log
+	python test/gr_heep_test_apps.py $(TEST_FLAGS) 2>&1 | tee test/gr_heep_test_apps.log
+	@echo "You can also find the output in test/gr_heep_test_apps.log"
 
 ## @section Utilities
 
