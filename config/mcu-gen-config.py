@@ -50,7 +50,7 @@ def config():
 
     # system.set_xif(
     #     CvXIf(
-    #         x_num_rs=2,  
+    #         x_num_rs=2,
     #         x_id_width=4,
     #         x_mem_width=32,
     #         x_rfr_width=32,

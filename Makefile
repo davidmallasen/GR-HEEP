@@ -71,6 +71,11 @@ verible:
 		verible-verilog-lint $$file --lint_fatal=false --parse_fatal=false; \
 	done
 
+## Runs black formating for python files
+format-python:
+	$(PYTHON) -m black config
+	$(PYTHON) -m black test
+
 ## @section RTL & SW generation
 
 ## Generate X-HEEP MCU files
