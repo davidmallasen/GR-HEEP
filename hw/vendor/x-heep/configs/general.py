@@ -27,9 +27,6 @@ from peripherals.base_peripherals import (
     GPIO_ao,
 )
 
-from peripherals.base_peripherals_domain import BasePeripheralDomain
-from peripherals.user_peripherals_domain import UserPeripheralDomain
-
 from peripherals.user_peripherals import (
     RV_plic,
     SPI_host,
@@ -44,14 +41,18 @@ from peripherals.user_peripherals import (
 
 from linker_script.linker_script import LinkerScript
 from interrupts.interrupts import Interrupts
+from peripherals.peripheral_domain import PeripheralDomain
 
 
 def config():
-    system = XHeep(BusType.onetoM)
-    system.set_cpu(cv32e20(rv32e=False, rv32m="RV32MSlow"))
+    system = XHeep()
+
+    system.set_bus_type(BusType.NtoM)
+
+    system.set_cpu(cv32e20())
 
     memory_ss = MemorySS()
-    memory_ss.add_ram_banks([32] * 2)
+    memory_ss.add_ram_banks([32] * 4)
     memory_ss.add_linker_section(LinkerSection.by_size("code", 0, 0x00000E800))
     memory_ss.add_linker_section(LinkerSection("data", 0x00000E800, None))
     system.set_memory_ss(memory_ss)
@@ -81,20 +82,20 @@ def config():
         AddressRegion("serial_link", start_address=0x50000000, length=0x01000000)
     )
     address_map.add_region(
-        AddressRegion("ext_slaves", start_address=0xF0000000, length=0x01000000)
+        AddressRegion("ext_slaves", start_address=0xC0000000, length=0x40000000)
     )
     system.set_address_map(address_map)
 
     # Peripheral domains initialization
-    base_peripheral_domain = BasePeripheralDomain()
-    user_peripheral_domain = UserPeripheralDomain()
+    base_peripheral_domain = PeripheralDomain(name="base_peripheral_domain")
+    user_peripheral_domain = PeripheralDomain(name="user_peripheral_domain")
 
     # Base peripherals. All base peripherals must be added.
     base_peripheral_domain.add_peripheral(SOC_ctrl(0x00000000))
     base_peripheral_domain.add_peripheral(Bootrom(0x00010000))
     base_peripheral_domain.add_peripheral(SPI_flash(0x00020000, 0x00008000))
     base_peripheral_domain.add_peripheral(
-        W25Q128JW_Controller(0x00029000, 0x00007000, cache="no")
+        W25Q128JW_Controller(0x00029000, 0x00007000, cache="yes")
     )
     base_peripheral_domain.add_peripheral(
         DMA(

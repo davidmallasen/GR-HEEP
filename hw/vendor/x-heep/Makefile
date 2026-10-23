@@ -64,7 +64,7 @@ LINKER ?= on_chip
 TARGET ?= sim
 
 # Mcu-gen configuration files
-X_HEEP_CFG  ?= configs/general.hjson
+X_HEEP_CFG  ?= configs/general.py
 PADS_CFG ?= configs/pad_cfg.py
 
 # MCU-Gen template files to generate
@@ -158,7 +158,7 @@ conda: util/conda_environment.yml
 ## @param BUS=[onetoM(default),NtoM]
 ## @param MEMORY_BANKS=[2(default)to(16-MEMORY_BANKS_IL)]
 ## @param MEMORY_BANKS_IL=[0(default),2,4,8]
-## @param X_HEEP_CFG=[configs/general.hjson(default),<path-to-config-file>]
+## @param X_HEEP_CFG=[configs/general.py(default),<path-to-config-file>]
 mcu-gen:
 	$(PYTHON) util/xheep_gen/mcu_gen.py --config $(X_HEEP_CFG) --pads_cfg $(PADS_CFG) --outtpl "$(MCU_GEN_TEMPLATES)" --externaltpl "$(EXTERNAL_MCU_GEN_TEMPLATES)" --cpu $(CPU) --bus $(BUS) --memorybanks $(MEMORY_BANKS) --memorybanks_il $(MEMORY_BANKS_IL)
 
@@ -167,6 +167,7 @@ mcu-gen:
 
 	$(MAKE) verible
 	$(MAKE) format-python
+	@$(PYTHON) util/xheep_gen/print_mcu_config.py --config $(X_HEEP_CFG) --pads_cfg $(PADS_CFG) --cpu $(CPU) --bus $(BUS) --memorybanks $(MEMORY_BANKS) --memorybanks_il $(MEMORY_BANKS_IL)
 
 ## Display mcu_gen.py help
 mcu-gen-help:
@@ -302,7 +303,7 @@ questasim-run-opt-app: app
 ## @section Vivado
 
 ## Builds (synthesis and implementation) the bitstream for the FPGA version using Vivado
-## @param FPGA_BOARD=pynq-z2,nexys-a7-100t,genesys2,aup-zu3,zcu102,zcu104
+## @param FPGA_BOARD=pynq-z2,nexys-a7-100t,genesys2,aup-zu3,zcu102,zcu104,vpk180
 ## @param FUSESOC_FLAGS=--flag=<flagname>
 vivado-fpga:
 	$(FUSESOC) --cores-root $(FUSESOC_CORES_ROOT) run --no-export --target=$(FPGA_BOARD) $(FUSESOC_FLAGS) --build openhwgroup.org:systems:core-v-mini-mcu $(FUSESOC_PARAM) 2>&1 | tee buildvivado.log
@@ -311,7 +312,7 @@ vivado-fpga-nobuild:
 	$(FUSESOC) --cores-root $(FUSESOC_CORES_ROOT) run --no-export --target=$(FPGA_BOARD) $(FUSESOC_FLAGS) --setup openhwgroup.org:systems:core-v-mini-mcu $(FUSESOC_PARAM) 2>&1 | tee buildvivado.log
 
 ## Loads the generated bitstream into the FPGA
-## @param FPGA_BOARD=pynq-z2,nexys-a7-100t,genesys2,aup-zu3,zcu102,zcu104
+## @param FPGA_BOARD=pynq-z2,nexys-a7-100t,genesys2,aup-zu3,zcu102,zcu104,vpk180
 vivado-fpga-pgm:
 	$(FUSESOC) --cores-root $(FUSESOC_CORES_ROOT) run --no-export --target=$(FPGA_BOARD) $(FUSESOC_FLAGS) --run openhwgroup.org:systems:core-v-mini-mcu $(FUSESOC_PARAM) 2>&1 | tee programfpga.log
 
@@ -373,7 +374,7 @@ gdb_connect:
 ## Run the tests for X-HEEP. Cleans and rebuilds all the project.
 .PHONY: test
 test:
-	$(MAKE) mcu-gen X_HEEP_CFG=configs/ci.hjson
+	$(MAKE) mcu-gen X_HEEP_CFG=configs/ci.py
 	$(RM) test/*.log
 	$(PYTHON) test/test_apps/test_apps.py $(TEST_FLAGS) 2>&1 | tee test/test_apps/test_apps.log
 	@echo "You can also find the output in test/test_apps/test_apps.log"
